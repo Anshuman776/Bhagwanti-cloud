@@ -1,6 +1,7 @@
 import { useAuthStore } from "../store/authStore"
 
-const BASE_URL = "http://localhost:8000/api/v1" // Dev uvicorn backend port
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"; // Dev uvicorn backend port
 
 interface RequestOptions extends RequestInit {
   skipAuth?: boolean
