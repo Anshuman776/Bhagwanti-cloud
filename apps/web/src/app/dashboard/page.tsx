@@ -50,6 +50,9 @@ interface Project {
   port: number
 }
 
+const WS_URL =
+  process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user, clearAuth, refreshToken, accessToken } = useAuthStore()
@@ -138,7 +141,7 @@ export default function DashboardPage() {
 
     const connectTelemetry = () => {
       if (!isMounted) return
-      ws = new WebSocket(`ws://localhost:8000/api/v1/monitoring/ws?node_id=${selectedNodeId}&token=${accessToken}`)
+      ws = new WebSocket(`${WS_URL}/api/v1/monitoring/ws?node_id=${selectedNodeId}&token=${accessToken}`)
       
       ws.onmessage = (event) => {
         try {
@@ -246,7 +249,7 @@ export default function DashboardPage() {
       logWs.close()
     }
     
-    const ws = new WebSocket(`ws://localhost:8000/api/v1/docker/containers/${containerName}/logs/ws?node_id=${selectedNodeId}&token=${accessToken}`)
+    const ws = new WebSocket(`${WS_URL}/api/v1/docker/containers/${containerName}/logs/ws?node_id=${selectedNodeId}&token=${accessToken}`)
     
     ws.onmessage = (event) => {
       setLogLines(prev => {
@@ -841,7 +844,7 @@ export default function DashboardPage() {
 
                       {/* Display lines */}
                       <div className="flex-1 min-h-[350px]">
-                        <DynamicXterm wsUrl={`ws://localhost:8000/api/v1/terminal/ws?node_id=${selectedNodeId}&token=${accessToken}`} />
+                        <DynamicXterm wsUrl={`${WS_URL}/api/v1/terminal/ws?node_id=${selectedNodeId}&token=${accessToken}`} />
                       </div>
                     </div>
                   )}
