@@ -389,7 +389,7 @@ export default function DashboardPage() {
                 value={selectedNodeId}
                 onChange={(e) => {
                   setSelectedNodeId(e.target.value)
-                  setTerminalLines([`[Bhagwanti Cloud] Switching session target to ${e.target.value}...`])
+                  setLogLines([`[Bhagwanti Cloud] Switching session target to ${e.target.value}...`])
                 }}
                 className="bg-transparent text-xs font-semibold text-zinc-200 focus:outline-none cursor-pointer pr-2"
               >
