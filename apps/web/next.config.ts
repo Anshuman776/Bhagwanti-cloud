@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["10.39.193.251"],
+  allowedDevOrigins: [
+    "cloud.anshumanmaurya.in",
+  ],
 };
 
 export default nextConfig;
