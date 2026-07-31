@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: bhagwanti-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"       # HTTP traffic
+      - "8080:8080"   # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - bhagwanti-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: bhagwanti-db
+    restart: always
+    environment:
+      POSTGRES_USER: bhagwanti
+      POSTGRES_PASSWORD: bhagwanti_secure_pass
+      POSTGRES_DB: bhagwanti_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bhagwanti-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: bhagwanti-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bhagwanti-network
+
+  api:
+    build:
+      context: ../
+      dockerfile: infrastructure/Dockerfile.api
+    container_name: bhagwanti-api
+    restart: always
+    environment:
+      - PROJECT_NAME=Bhagwanti Cloud
+      - SECRET_KEY=bhagwanti_cloud_super_secret_key_development_only_1234567890
+      - DATABASE_URL=postgresql://bhagwanti:bhagwanti_secure_pass@db:5432/bhagwanti_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=8000"
+    networks:
+      - bhagwanti-network
+
+  web:
+    build:
+      context: ../
+      dockerfile: infrastructure/Dockerfile.web
+    container_name: bhagwanti-web
+    restart: always
+    depends_on:
+      - api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.web.entrypoints=web"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+    networks:
+      - bhagwanti-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  bhagwanti-network:
+    name: bhagwanti-network
